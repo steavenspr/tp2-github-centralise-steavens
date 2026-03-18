@@ -17,6 +17,7 @@
 - Créer une branche
 - Fusionner une branche dans la branche principale
 - Mettre à jour le dépôt GitHub
+- Provoquer et résoudre un merge conflict
 
 ---
 
@@ -237,6 +238,184 @@ Historique :
 
 ---
 
+## TP4 - Résolution d'un Merge Conflict
+
+### Principe
+
+Un merge conflict apparaît lorsque deux développeurs modifient la **même ligne** d'un fichier sur deux branches différentes. Git ne peut pas choisir automatiquement quelle version garder — le développeur doit résoudre le conflit manuellement.
+
+---
+
+### Etape 1 - Préparation
+
+Vérifier que la branche principale est à jour :
+
+```bash
+git checkout main
+git pull
+git log --oneline
+```
+
+---
+
+### Etape 2 - Créer deux branches différentes
+
+**Etudiant A (Steavens) :**
+```bash
+git checkout -b Branche-steavens
+```
+
+**Etudiant B (Steve) :**
+```bash
+git checkout -b branche-steve
+```
+
+Vérifier :
+```bash
+git branch
+```
+
+---
+
+### Etape 3 - Modifier la même ligne de code
+
+Les deux étudiants modifient la **même ligne** de `Main.java`.
+
+**Code initial :**
+```java
+System.out.println("Travail sur branche feature");
+```
+
+**Etudiant A modifie en :**
+```java
+System.out.println("Bonsoirgi");
+```
+
+**Etudiant B modifie en :**
+```java
+System.out.println("bonjour");
+```
+
+Chacun commit ses modifications :
+```bash
+git add .
+git commit -m "Modification du nom"
+```
+
+---
+
+### Etape 4 - Envoyer les branches sur GitHub
+
+**Etudiant A :**
+```bash
+git push origin Branche-steavens
+```
+
+**Etudiant B :**
+```bash
+git push origin branche-steve
+```
+
+---
+
+### Etape 5 - Fusionner la première branche (sans conflit)
+
+La branche de l'étudiant B est fusionnée en premier dans `main` :
+
+```bash
+git checkout main
+git pull
+git merge branche-steve
+git push
+```
+
+`main` contient maintenant `"bonjour"`.
+
+---
+
+### Etape 6 - Tenter de fusionner la deuxième branche (conflit !)
+
+On tente de fusionner la branche de l'étudiant A :
+
+```bash
+git merge Branche-steavens
+```
+
+Git affiche :
+```
+CONFLICT (content): Merge conflict in Main.java
+Automatic merge failed; fix conflicts and then commit the result.
+```
+
+---
+
+### Etape 7 - Observer le conflit dans le fichier
+
+Le fichier `Main.java` contient maintenant les marqueurs de conflit :
+
+```java
+<<<<<<< HEAD
+        System.out.println("bonjour");
+=======
+        System.out.println("Bonsoirgi");
+>>>>>>> Branche-steavens
+```
+
+**Signification :**
+- `<<<<<<< HEAD` = version actuelle de `main`
+- `=======` = séparateur
+- `>>>>>>> Branche-steavens` = version de la branche
+
+---
+
+### Etape 8 - Résoudre le conflit manuellement
+
+Modifier le fichier pour garder les deux versions (ou une seule) et **supprimer les marqueurs** :
+
+```java
+public class Main {
+    public static void main(String[] args) {
+        System.out.println("Hello World");
+        System.out.println("Version 1.1");
+        System.out.println("Version 1.2");
+        System.out.println("Travail sur branche feature");
+        System.out.println("bonjour et Bonsoirgi");
+    }
+}
+```
+
+---
+
+### Etape 9 - Finaliser le merge
+
+```bash
+git add .
+git commit -m "Resolution du merge conflict"
+git push
+```
+
+---
+
+### Etape 10 - Vérifier l'historique
+
+```bash
+git log --oneline --graph
+```
+
+Résultat obtenu :
+```
+*   e01f709 (HEAD -> main, origin/main) Resolution du merge conflict
+|\  
+| * 397a474 (origin/Branche-steavens, Branche-steavens) Modification en bonsoir
+* | 720d83c (origin/branche-steve) modification bonjour
+|/  
+* 746db1f modifier main.java
+```
+
+Le graphe montre clairement les deux branches qui **divergent** puis se **rejoignent** en un seul commit de résolution.
+
+---
+
 ## Récapitulatif des commandes utilisées
 
 | Commande | Description |
@@ -250,6 +429,7 @@ Historique :
 | `git push` | Envoyer les commits sur GitHub |
 | `git push origin v1.0` | Envoyer un tag sur GitHub |
 | `git log --oneline` | Voir l'historique des commits |
+| `git log --oneline --graph` | Voir l'historique avec le graphe des branches |
 | `git checkout -b feature` | Créer une branche et basculer dessus |
 | `git checkout main` | Revenir sur la branche principale |
 | `git branch` | Lister les branches |
@@ -264,6 +444,17 @@ Historique :
 1. Modifier le code
 2. git add .          -> préparer les fichiers
 3. git commit -m      -> sauvegarder la version
-4. git tag            -> marquer la version
+4. git tag            -> marquer la version (si besoin)
 5. git push           -> envoyer sur GitHub
+```
+
+## Workflow résolution de conflit
+
+```
+1. git merge <branche>           -> déclenche le conflit
+2. Ouvrir le fichier en conflit  -> supprimer les marqueurs <<<, ===, >>>
+3. Choisir la bonne version      -> modifier manuellement
+4. git add .                     -> marquer comme résolu
+5. git commit -m "Resolution"    -> finaliser le merge
+6. git push                      -> envoyer sur GitHub
 ```

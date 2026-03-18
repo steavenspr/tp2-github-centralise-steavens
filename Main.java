@@ -4,6 +4,6 @@ public class Main {
         System.out.println("Version 1.1");
         System.out.println("Version 1.2");
         System.out.println("Travail sur branche feature");
-        System.out.println("Ceci est la version de Steve et Steavens v2");
+        System.out.println("Ceci est la version de Steve et Steavens v3");
     }
 }
